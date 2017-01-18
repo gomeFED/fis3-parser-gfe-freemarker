@@ -1,8 +1,8 @@
 var Freemarker = require('freemarker.js');
-var root = fis.project.getProjectPath();
-
+var projectPath = fis.project.getProjectPath();
+var cachePath = fis.project.getCachePath();
 var fm = new Freemarker({
-    viewRoot: root
+    viewRoot: cachePath
 });
 
 /**
@@ -13,7 +13,7 @@ var fm = new Freemarker({
 function mockData(file) {
     var data = {},
         mockFilePath = file.subpathNoExt.replace('/html/', '/data/') + '.json',
-        mockFile = fis.file(root, mockFilePath);
+        mockFile = fis.file(projectPath, mockFilePath);
 
     if (mockFile.exists()) {
         try {
@@ -37,11 +37,14 @@ function mockData(file) {
  */
 module.exports = function(content, file, settings) {
     try {
-        content = fm.renderSync(file.subpath, mockData(file));
+        //将内容写到缓存文件的目录：防止此插件前面还有其他对内容处理的插件
+        fis.util.write(cachePath + '/freemarker.tmp', content, 'utf-8');
+        content = fm.renderSync('/freemarker.tmp', mockData(file));
     } catch (e) {
         fis.log.warn('Got error: %s while parsing `%s`.%s', e.message.red, file.subpath, e.detail || '');
         fis.log.debug(e.stack);
     }
+    console.log(content);
     return content;
 
 };

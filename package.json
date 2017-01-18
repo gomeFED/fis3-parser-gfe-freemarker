@@ -1,6 +1,6 @@
 {
     "name": "fis3-parser-gfe-freemarker",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "解析freemarker模板",
     "main": "index.js",
     "repository": {
