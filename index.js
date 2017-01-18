@@ -44,7 +44,6 @@ module.exports = function(content, file, settings) {
         fis.log.warn('Got error: %s while parsing `%s`.%s', e.message.red, file.subpath, e.detail || '');
         fis.log.debug(e.stack);
     }
-    console.log(content);
     return content;
 
 };
