@@ -1,8 +1,9 @@
 var Freemarker = require('freemarker.js');
+var fs = require('fs');
 var projectPath = fis.project.getProjectPath();
 var cachePath = fis.project.getCachePath();
 var fm = new Freemarker({
-    viewRoot: cachePath
+    viewRoot: projectPath
 });
 
 /**
@@ -36,14 +37,20 @@ function mockData(file) {
  * @return {string}             处理后的文件内容
  */
 module.exports = function(content, file, settings) {
-    try {
-        //将内容写到缓存文件的目录：防止此插件前面还有其他对内容处理的插件
-        fis.util.write(cachePath + '/freemarker.tmp', content, 'utf-8');
-        content = fm.renderSync('/freemarker.tmp', mockData(file));
-    } catch (e) {
-        fis.log.warn('Got error: %s while parsing `%s`.%s', e.message.red, file.subpath, e.detail || '');
-        fis.log.debug(e.stack);
+    var isEntryFile = (~content.indexOf('/html') || ~content.indexOf('/HTML')) && (~content.indexOf('/head') || ~content.indexOf('/HEAD')) && (~content.indexOf('/body') || ~content.indexOf('/BODY'));
+    var tmpFile = file.realpathNoExt+'.tmp';
+    if(isEntryFile){
+        try {
+            //将内容写到缓存文件的目的：防止此插件前面其它插件对内容的处理
+            fis.util.write(tmpFile, content, 'utf-8');
+            content = fm.renderSync(file.subpathNoExt + '.tmp', mockData(file));
+            if(fis.util.isFile(tmpFile)){
+                fis.util.del(tmpFile);    
+            }
+        } catch (e) {
+            fis.log.warn('Got error: %s while parsing `%s`.%s', e.message.red, file.subpath, e.detail || '');
+            fis.log.debug(e.stack);
+        }
     }
     return content;
-
 };
