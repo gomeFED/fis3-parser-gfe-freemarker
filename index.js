@@ -43,7 +43,7 @@ module.exports = function(content, file, settings) {
         try {
             //将内容写到缓存文件的目的：防止此插件前面其它插件对内容的处理
             fis.util.write(tmpFile, content, 'utf-8');
-            content = fm.renderSync(file.subpathNoExt + '.tmp', mockData(file));
+            content = fm.renderSync(tmpFile, mockData(file));
             if(fis.util.isFile(tmpFile)){
                 fis.util.del(tmpFile);    
             }
